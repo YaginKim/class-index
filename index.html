@@ -17,6 +17,8 @@
 <meta name="page-type" content="software">
 <link rel="preload" href="fonts/HSGooltokki.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/CaviarDreams-Italic.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/Gyeonggi-ko1.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="fonts/gyeonggi.css">
 <link rel="stylesheet" href="assets/system.css">
 <link rel="stylesheet" href="assets/ui/cards.css">
 <link rel="stylesheet" href="assets/motion/motion.css">
@@ -29,8 +31,7 @@
   unicode-range: U+0020-007E, U+00A0-00FF, U+2013-2014, U+2018-201D, U+2026; }
 @font-face { font-family: "AK"; src: url("fonts/HSGooltokki.woff2") format("woff2"); font-display: swap;
   unicode-range: U+1100-11FF, U+3000-303F, U+3130-318F, U+AC00-D7AF, U+FF01-FF5E; }
-/* 작은 숫자용: 한글 글꼴의 숫자(Caviar 이탤릭의 1은 작게 쓰면 빗금처럼 보임) */
-@font-face { font-family: "AK-ko"; src: url("fonts/HSGooltokki.woff2") format("woff2"); font-display: swap; }
+/* 내용(본문·메뉴·버튼·작은 숫자): 경기천년제목 "AKT" (fonts/gyeonggi.css, 영문·자주 쓰는 한글·나머지 한글 세 조각) */
 /* palette: start.mjs brand --page software --bg #F3F4EF --ink #0B2219 --accent #06402B (inverse ground set to the brand forest) */
 :root {
   --p-bg: #f3f4ef; --p-surface: #e6e8e3; --p-ink: #0b2219; --p-muted: #56655c;
@@ -38,8 +39,8 @@
   --p-inv-bg: #06402b; --p-inv-surface: #0b4d35; --p-inv-ink: #eef1ea; --p-inv-muted: #a9c2b5;
   --p-inv-accent: #c8f169; --p-inv-accent-ink: #06402b; --p-inv-action: #eef1ea; --p-inv-action-ink: #06402b;
   --font-display: "AK", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-  --font-text: "AK", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
-  --font-mono: "AK", ui-monospace, monospace;
+  --font-text: "AKT", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-mono: "AKT", ui-monospace, monospace;
   --display-weight: 400;
   --display-tracking: -0.02em;
   --display-tracking-xl: -0.03em;
@@ -59,7 +60,7 @@
 <style>
 body { word-break: keep-all; overflow-wrap: break-word; }
 .en { font-family: "AK", serif; letter-spacing: 0; }
-.num { font-family: "AK-ko", var(--font-text); }
+.num, .host { font-family: var(--font-text); }
 #favs .addrow { padding-inline: 0; }
 .rail__top .nav__logo { min-height: 44px; }
 #folder h2 { font-size: clamp(44px, 4vw + 20px, 96px); line-height: 1.05; }
@@ -339,7 +340,7 @@ input[type=color] { width: 52px; height: 44px; border: 1px solid rgba(11,34,25,.
     </div>
     <div class="closing__links">
       <div class="footer__legal">
-        <span class="legal-row"><span>&copy; <span class="en">2026</span> 김아근</span><a href="#folders">폴더</a><a href="#how">사용법</a></span>
+        <span class="legal-row"><span>&copy; 2026 김아근</span><a href="#folders">폴더</a><a href="#how">사용법</a></span>
       </div>
     </div>
   </div>
@@ -447,12 +448,12 @@ function row(o, kind, folderId){
   const style = `--c:${o.color};--fg:${textOn(o.color)}`;
   if (kind === "folder") return `<li class="row" style="${style}"><a class="hit" href="#f-${esc(o.id)}"><span class="dot" aria-hidden="true"></span><span class="nm">${esc(o.name)}</span><span class="sub">자료 <span class="num">${o.items.length}</span>개</span><span class="go">${ARROW}</span></a>${tools(kind, "", o.id)}</li>`;
   const url = safeUrl(o.url);
-  const inner = `<span class="dot" aria-hidden="true"></span><span class="nm">${esc(o.name)}</span><span class="sub en">${url ? esc(host(url)) : "링크 없음"}</span><span class="go">${ARROW}</span>`;
+  const inner = `<span class="dot" aria-hidden="true"></span><span class="nm">${esc(o.name)}</span><span class="sub host">${url ? esc(host(url)) : "링크 없음"}</span><span class="go">${ARROW}</span>`;
   return `<li class="row${url ? "" : " nolink"}" style="${style}">${url ? `<a class="hit" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${inner}</a>` : `<div class="hit">${inner}</div>`}${tools(kind, folderId, o.id)}</li>`;
 }
 function fav(o){
   const url = safeUrl(o.url);
-  const inner = `<span class="fav__dot" aria-hidden="true"></span><span><span class="fav__name">${esc(o.name)}</span><span class="fav__host en">${url ? esc(host(url)) : "링크 없음"}</span></span>${OUT}`;
+  const inner = `<span class="fav__dot" aria-hidden="true"></span><span><span class="fav__name">${esc(o.name)}</span><span class="fav__host host">${url ? esc(host(url)) : "링크 없음"}</span></span>${OUT}`;
   return `<li class="fav" style="--c:${o.color}">${url ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${inner}</a>` : `<div class="fav__hit">${inner}</div>`}${tools("fav", "", o.id)}</li>`;
 }
 function note(){
@@ -464,11 +465,11 @@ function renderHeroWindow(){
   const all = data.folders.flatMap(f => f.items.map(i => ({ ...i, folder: f.name })));
   $("winSide").innerHTML = `<span class="is-on"><i style="--c:#06402b"></i>전체 자료</span><span class="lbl">폴더</span>` + data.folders.slice(0, 7).map(f => `<span><i style="--c:${f.color}"></i>${esc(f.name)}</span>`).join("");
   $("winCount").textContent = String(all.length);
-  const rows = all.slice(0, 6).map(i => `<div class="win__row"><span class="sq" style="--c:${i.color}"></span><div><b>${esc(i.name)}</b><small>${esc(i.folder)}</small></div><span class="win__chip en">${esc(host(i.url) || "링크 없음")}</span></div>`)
+  const rows = all.slice(0, 6).map(i => `<div class="win__row"><span class="sq" style="--c:${i.color}"></span><div><b>${esc(i.name)}</b><small>${esc(i.folder)}</small></div><span class="win__chip host">${esc(host(i.url) || "링크 없음")}</span></div>`)
     .concat(data.folders.slice(0, Math.max(0, 6 - all.length)).map(f => `<div class="win__row"><span class="sq sq--folder" style="--c:${f.color}"></span><div><b>${esc(f.name)}</b><small>폴더</small></div><span class="win__chip">자료 <span class="num">${f.items.length}</span>개</span></div>`));
   $("winRows").innerHTML = rows.join("");
   const first = all[0];
-  $("noteCard").innerHTML = first ? `<span class="en">Opens in a new tab</span><b>${esc(first.name)}</b><small>${esc(first.folder)} · <span class="en">${esc(host(first.url))}</span></small>` : "";
+  $("noteCard").innerHTML = first ? `<span class="en">Opens in a new tab</span><b>${esc(first.name)}</b><small>${esc(first.folder)} · <span class="host">${esc(host(first.url))}</span></small>` : "";
   $("noteCard").hidden = !first;
 }
 function render(){
