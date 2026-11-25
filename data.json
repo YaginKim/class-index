@@ -1,0 +1,31 @@
+{
+  "title": "김아근의 수업자료일람",
+  "favorites": [],
+  "folders": [
+    {
+      "id": "art",
+      "name": "미술 관련",
+      "color": "#E85D75",
+      "items": [
+        {
+          "id": "pencil",
+          "name": "연필 소묘 입문",
+          "url": "https://claude.ai/artifact/RQU23eYAsQpbQNbF8MuUAe",
+          "color": "#2F3640"
+        }
+      ]
+    },
+    {
+      "id": "class",
+      "name": "학급 관리",
+      "color": "#3D7DD8",
+      "items": []
+    },
+    {
+      "id": "game",
+      "name": "게이미피케이션",
+      "color": "#8E5BD9",
+      "items": []
+    }
+  ]
+}
