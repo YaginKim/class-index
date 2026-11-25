@@ -4,6 +4,6 @@
 //  - sheetUrl      : (선택) 그 구글 시트의 주소. 넣으면 관리자 로그인 때 위 메뉴에 "구글 시트 열기"가 생깁니다.
 // 두 값 모두 공개되어도 되는 주소입니다. 저장은 Apps Script가 비밀번호로 막습니다.
 window.SITE_CONFIG = {
-  appsScriptUrl: "",
-  sheetUrl: ""
+  appsScriptUrl: "https://script.google.com/macros/s/AKfycbxC_mtmw9hH3QjjBsrQYU2deb8vGf871M2hNJAJbED6uUFP4gMBP34L8gr9AY0AAZr-/exec",
+  sheetUrl: "https://docs.google.com/spreadsheets/d/171uIToq5egQNifKVeded2tnrov86vcMlX7N3CaEewts/edit"
 };
