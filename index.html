@@ -455,6 +455,12 @@ function lum(hex){
   const ch = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
   return 0.2126 * ch(n >> 16) + 0.7152 * ch((n >> 8) & 255) + 0.0722 * ch(n & 255);
 }
+// 어두운 바탕에서 거의 안 보이는 아주 어두운 색(예: 숲색 #06402B)은 화면에 그릴 때만 밝게 올립니다. 저장된 색은 그대로
+function shown(hex){
+  const c = safeColor(hex); if (lum(c) >= 0.06) return c;
+  const n = parseInt(c.slice(1), 16), up = v => Math.round(v + (255 - v) * 0.38);
+  return "#" + [n >> 16, (n >> 8) & 255, n & 255].map(v => up(v).toString(16).padStart(2, "0")).join("");
+}
 function textOn(hex){ const L = lum(hex); return (L + 0.05) / (lum("#0B2219") + 0.05) > 1.05 / (L + 0.05) ? "#0B2219" : "#FFFFFF"; }
 function toast(msg){ const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 2600); }
 function cleanLink(i){ return { id: i.id, name: String(i.name || "이름 없음"), url: String(i.url || ""), color: safeColor(i.color) }; }
@@ -519,13 +525,13 @@ function tools(kind, folderId, id, obj){
 function addBtn(act, label, f){ return admin ? `<button class="addrow" type="button" data-act="${act}"${f ? ` data-f="${esc(f)}"` : ""}><span class="plus" aria-hidden="true">+</span>${label}</button>` : ""; }
 function lockChip(f){ return f.adminOnly ? `<span class="fchip fchip--lock">${LOCK}관리자만</span>` : ""; }
 function card(f){
-  return `<li class="fcard${f.adminOnly ? " is-private" : ""}" style="--c:${f.color}"><a class="fcard__hit" href="#f-${esc(f.id)}">
+  return `<li class="fcard${f.adminOnly ? " is-private" : ""}" style="--c:${shown(f.color)}"><a class="fcard__hit" href="#f-${esc(f.id)}">
     <span class="fcard__top"><span class="fchip">자료 ${f.items.length}개</span>${lockChip(f)}</span>
     <span class="fcard__name">${esc(f.name)}</span><span class="go">${ARROW}</span></a>
     <span class="fcard__glass" aria-hidden="true"></span>${tools("folder", "", f.id, f)}</li>`;
 }
 function row(o, folderId){
-  const style = `--c:${o.color};--fg:${textOn(o.color)}`;
+  const style = `--c:${shown(o.color)};--fg:${textOn(shown(o.color))}`;
   const url = safeUrl(o.url);
   const inner = `<span class="dot" aria-hidden="true"></span><span class="nm">${esc(o.name)}</span><span class="sub host">${url ? esc(host(url)) : "링크 없음"}</span><span class="go">${ARROW}</span>`;
   return `<li class="row${url ? "" : " nolink"}" style="${style}">${url ? `<a class="hit" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${inner}</a>` : `<div class="hit">${inner}</div>`}${tools("item", folderId, o.id)}</li>`;
@@ -533,7 +539,7 @@ function row(o, folderId){
 function fav(o){
   const url = safeUrl(o.url);
   const inner = `<span class="fav__dot" aria-hidden="true"></span><span><span class="fav__name">${esc(o.name)}</span><span class="fav__host host">${url ? esc(host(url)) : "링크 없음"}</span></span>${OUT}`;
-  return `<li class="fav" style="--c:${o.color}">${url ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${inner}</a>` : `<div class="fav__hit">${inner}</div>`}${tools("fav", "", o.id)}</li>`;
+  return `<li class="fav" style="--c:${shown(o.color)}">${url ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${inner}</a>` : `<div class="fav__hit">${inner}</div>`}${tools("fav", "", o.id)}</li>`;
 }
 function note(){
   if (loadFailed) return `<p class="note">저장된 목록을 불러오지 못해 기본 목록을 보여 줍니다. 인터넷 연결을 확인하고 잠시 후 새로고침해 보세요.</p>`;
@@ -552,11 +558,11 @@ const SPOTS = [
   { x: 44, y: 34, s: 70, r: -6, d: 0.25, t: 15, far: 1 }
 ];
 function renderShapes(list){
-  const cols = (list.length ? list.map(f => f.color) : PALETTE.slice(1, 5));
+  const cols = (list.length ? list.map(f => shown(f.color)) : PALETTE.slice(1, 5));
   $("shapes").innerHTML = SPOTS.map((p, i) => `<span class="g"${p.far ? " data-far" : ""} data-depth="${p.d}" style="--x:${p.x};--y:${p.y};--s:${p.s};--r:${p.r};--t:${p.t};--c:${cols[i % cols.length]}"><span class="g__in"></span></span>`).join("");
 }
 function renderTicker(list){
-  const items = list.map(f => `<span class="ticker__item" style="--c:${f.color}"><i></i>${esc(f.name)}<small>자료 ${f.items.length}개</small></span>`);
+  const items = list.map(f => `<span class="ticker__item" style="--c:${shown(f.color)}"><i></i>${esc(f.name)}<small>자료 ${f.items.length}개</small></span>`);
   if (!items.length) { $("ticker").innerHTML = ""; return; }
   let run = items.slice(); while (run.length < 8) run = run.concat(items);   // 띠가 화면보다 길도록 채운 뒤 두 번 이어 붙여 끊김 없이 돕니다
   $("ticker").innerHTML = run.join("") + run.join("");
@@ -585,7 +591,7 @@ function render(){
   if (f) {
     document.title = `${f.name} · ${data.title}`;
     $("folderView").innerHTML = `<a class="btn btn--secondary back" href="#folders">${BACK}전체 폴더</a>
-      <div class="fold-head"><h2 id="folder-h"><i class="tag" style="--c:${f.color}" aria-hidden="true"></i>${esc(f.name)}${lockChip(f)}</h2><span class="sub">자료 <span class="num">${f.items.length}</span>개 · 이름을 누르면 새 창에서 열립니다</span></div>
+      <div class="fold-head"><h2 id="folder-h"><i class="tag" style="--c:${shown(f.color)}" aria-hidden="true"></i>${esc(f.name)}${lockChip(f)}</h2><span class="sub">자료 <span class="num">${f.items.length}</span>개 · 이름을 누르면 새 창에서 열립니다</span></div>
       <ul class="list">${f.items.map(x => row(x, f.id)).join("")}</ul>
       ${addBtn("addItem", "자료 버튼 추가", f.id)}
       ${!f.items.length && !admin ? `<p class="empty">이 폴더에는 아직 자료가 없습니다.</p>` : ""}${note()}`;
