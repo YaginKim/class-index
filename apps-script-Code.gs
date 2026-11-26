@@ -7,6 +7,8 @@
  *  - 비밀번호는 시트 메뉴 [수업자료일람 > 관리자 비밀번호 설정]에서 정합니다.
  *    코드나 시트에는 비밀번호 대신 해시(되돌릴 수 없는 암호화 값)만 남습니다.
  *  - 10분 안에 5번 틀리면 10분 동안 로그인과 저장을 막습니다.
+ *  - "관리자만 보기"로 표시한 폴더(adminOnly)는 누구나 읽는 목록(GET)에서 빼고 보냅니다.
+ *    비밀번호가 맞을 때(POST action "load")만 그 폴더까지 담은 전체 목록을 돌려줍니다.
  *
  * 시트 구성
  *  - "_data": 사이트가 쓰는 원본(숨김). 직접 고치지 마세요.
@@ -57,12 +59,26 @@ function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
 
-// 읽기: 누구나
+// 읽기: 누구나. 관리자만 보기 폴더는 빼고 보냅니다
 function doGet() {
-  return json_({ ok: true, data: readData_() });
+  return json_({ ok: true, data: public_(readData_()) });
 }
 
-// 쓰기: 비밀번호가 맞을 때만. 본문은 {"action": "check" | "save", "password": "...", "data": {...}}
+function public_(d) {
+  if (!d || !Array.isArray(d.folders)) return d;
+  const out = JSON.parse(JSON.stringify(d));
+  out.folders = out.folders.filter(f => !(f && f.adminOnly === true));
+  return out;
+}
+
+function hasHidden_(d) {
+  return !!(d && Array.isArray(d.folders) && d.folders.some(f => f && f.adminOnly === true));
+}
+
+// 쓰기: 비밀번호가 맞을 때만. 본문은 {"action": "check" | "load" | "save", "password": "...", "data": {...}, "full": true}
+//  - load: 관리자만 보기 폴더까지 담은 전체 목록을 돌려줍니다
+//  - save: 관리자만 보기 폴더가 저장돼 있는데 전체 목록을 받지 않은 화면(full이 아님)이 저장하면,
+//          그 폴더가 지워지지 않도록 'stale'로 막습니다
 function doPost(e) {
   let body;
   try { body = JSON.parse(e.postData.contents); } catch (err) { return json_({ result: 'invalid' }); }
@@ -71,7 +87,9 @@ function doPost(e) {
   try {
     const v = verify_(String(body.password || ''));
     if (v !== 'ok' || body.action === 'check') return json_({ result: v });
+    if (body.action === 'load') return json_({ result: 'ok', data: readData_() });
     if (body.action !== 'save' || !valid_(body.data)) return json_({ result: 'invalid' });
+    if (body.full !== true && hasHidden_(readData_())) return json_({ result: 'stale' });
     writeData_(body.data);
     return json_({ result: 'ok' });
   } finally {
@@ -128,13 +146,14 @@ function writeData_(d) {
   sh.clearContents();
   sh.getRange(1, 1, rows.length, 1).setValues(rows);
 
-  const list = [['구분', '폴더', '이름', '링크', '색']];
-  (d.favorites || []).forEach(f => list.push(['즐겨찾기', '', cell_(f.name), cell_(f.url), cell_(f.color)]));
+  const list = [['구분', '폴더', '이름', '링크', '색', '관리자만']];
+  (d.favorites || []).forEach(f => list.push(['즐겨찾기', '', cell_(f.name), cell_(f.url), cell_(f.color), '']));
   d.folders.forEach(f => {
-    list.push(['폴더', cell_(f.name), '', '', cell_(f.color)]);
-    (f.items || []).forEach(i => list.push(['자료', cell_(f.name), cell_(i.name), cell_(i.url), cell_(i.color)]));
+    const only = f.adminOnly === true ? '예' : '';
+    list.push(['폴더', cell_(f.name), '', '', cell_(f.color), only]);
+    (f.items || []).forEach(i => list.push(['자료', cell_(f.name), cell_(i.name), cell_(i.url), cell_(i.color), only]));
   });
   const ls = sheet_(LIST_SHEET, false);
   ls.clearContents();
-  ls.getRange(1, 1, list.length, 5).setValues(list);
+  ls.getRange(1, 1, list.length, 6).setValues(list);
 }
