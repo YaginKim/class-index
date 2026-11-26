@@ -444,7 +444,7 @@ let canHide = false;      // 서버(Apps Script)가 관리자만 보기를 지�
 let editing = null, pickedColor = PALETTE[0], saving = Promise.resolve();
 
 const $ = id => document.getElementById(id);
-function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function clone(o){ return structuredClone(o); }
 function esc(s){ return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 function safeColor(c){ return /^#[0-9a-fA-F]{6}$/.test(c || "") ? c : "#2F3640"; }
 function safeUrl(u){ return /^https:\/\//i.test(u || "") ? u : ""; }
@@ -564,7 +564,7 @@ function renderShapes(list){
 }
 function renderTicker(list){
   const items = list.map(f => `<span class="ticker__item" style="--c:${shown(f.color)}"><i></i>${esc(f.name)}<small>자료 ${f.items.length}개</small></span>`);
-  if (!items.length) { $("ticker").innerHTML = ""; return; }
+  if (!items.length) { $("ticker").replaceChildren(); return; }
   let run = items.slice(); while (run.length < 8) run = run.concat(items);   // 띠가 화면보다 길도록 채운 뒤 두 번 이어 붙여 끊김 없이 돕니다
   $("ticker").innerHTML = run.join("") + run.join("");
 }
