@@ -20,6 +20,7 @@
 <link rel="preload" href="fonts/CaviarDreams-Italic.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/Gyeonggi-ko1.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="fonts/gyeonggi.css">
+<link rel="stylesheet" href="assets/vendor/liquid-glass/glass.css">
 <link rel="stylesheet" href="assets/system.css">
 <link rel="stylesheet" href="assets/ui/cards.css">
 <link rel="stylesheet" href="assets/motion/motion.css">
@@ -131,6 +132,16 @@ h1, h2, .nm, .close__word, .fcard__name { word-break: keep-all; }
 
 /* 떠 있는 유리 폴더(장식): 바깥(.g)은 포인터를 따라 깊이만큼 움직이고, 안쪽(.g__in)은 천천히 떠다닙니다 */
 .shapes { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+/* 첫 화면 배경의 유리 렌즈 하나(liquid-glass-js). 도형(z 0) 위, 글자(z 1) 아래. 화면에서 안 보이면 그리기를 멈춤 */
+.lg-stage { position: absolute; inset: 0; z-index: 0; pointer-events: none; content-visibility: auto; }
+.lg-stage .glass-container { position: absolute; left: 0; top: 0; padding: 0; opacity: 0; transition: opacity 900ms ease; will-change: transform; }
+.lg-stage .glass-container.is-ready { opacity: .9; }
+.lg-stage .glass-container canvas { box-shadow: 0 30px 60px rgba(0,0,0,.35) !important; }
+.lg-toggle { position: absolute; z-index: 2; right: var(--gut); bottom: 12px; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid rgba(232,238,230,.18); background: rgba(10,22,18,.6); color: var(--p-ink, #eef1ea); font: inherit; font-size: 13px; cursor: pointer; transition: background-color 150ms ease, border-color 150ms ease; }
+.lg-toggle:hover { border-color: rgba(232,238,230,.4); background: rgba(10,22,18,.85); }
+.lg-toggle:focus-visible { outline: 2px solid var(--p-accent, #c8f169); outline-offset: 2px; }
+.lg-toggle svg { width: 14px; height: 14px; }
+@media (max-width: 639px) { .lg-toggle { bottom: auto; top: calc(var(--nav, 56px) + 12px); right: 16px; } }
 .g { position: absolute; left: calc(var(--x) * 1%); top: calc(var(--y) * 1%); width: calc(var(--s) * 1px); aspect-ratio: 5 / 4;
   translate: -50% -50%; will-change: transform; }
 .g__in { position: absolute; inset: 0; border-radius: 18px; rotate: calc(var(--r) * 1deg);
@@ -353,6 +364,8 @@ input[type=color] { width: 52px; height: 44px; border: 1px solid rgba(232,238,23
 <main id="top" tabindex="-1">
   <section class="hero hero--stage home-only" id="hero" data-enter aria-labelledby="hero-h">
     <div class="shapes" id="shapes" aria-hidden="true"></div>
+    <div class="lg-stage" id="lgStage" aria-hidden="true"></div>
+    <button class="lg-toggle" id="lgToggle" type="button" hidden><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/></svg><span>배경 움직임 멈추기</span></button>
     <div class="wrap">
       <div class="hero-text hs">
         <p class="hs__kicker en" lang="en">Class materials, indexed</p>
@@ -856,6 +869,81 @@ document.addEventListener("visibilitychange", () => { if (document.visibilitySta
 render();
 load();
 }
+</script>
+<!-- 첫 화면 배경 효과: liquid-glass-js(README 방식: html2canvas → container.js → button.js). 출처는 assets/vendor/SOURCES.txt
+     README의 html2canvas 1.4.1은 이 사이트 CSS의 oklab()/color-mix() 색을 읽지 못해, 같은 API의 후속판 html2canvas-pro를 씁니다 -->
+<script src="assets/vendor/html2canvas-pro/html2canvas-pro.min.js" defer></script>
+<script src="assets/vendor/liquid-glass/container.js" defer></script>
+<script src="assets/vendor/liquid-glass/button.js" defer></script>
+<script>
+// 유리 렌즈 하나를 첫 화면의 빈 자리에서 천천히 떠다니게 합니다.
+//  - 움직임 줄이기 설정이면 처음부터 멈춘 채로 보여 줍니다(움직임은 no-preference일 때만).
+//  - 계속 움직이는 효과라 멈춤/재생 버튼을 둡니다.
+//  - 첫 화면이 안 보이거나 탭이 숨겨지면 그리기를 멈춥니다.
+// defer로 불러온 라이브러리가 실행된 뒤(DOMContentLoaded)에 시작합니다.
+addEventListener("DOMContentLoaded", () => {
+  const stage = document.getElementById("lgStage"), toggle = document.getElementById("lgToggle"), hero = document.getElementById("hero");
+  if (!stage || !hero || typeof Container !== "function" || typeof html2canvas !== "function") return;
+  try { const c = document.createElement("canvas"); if (!c.getContext("webgl")) return; } catch (e) { return; }
+  const motionOK = matchMedia("(prefers-reduced-motion: no-preference)");
+  let lens = null, raf = 0, shown = false, paused = false, t0 = performance.now(), lastW = innerWidth;
+  // 렌즈가 머무는 빈 자리: 넓은 화면은 제목 글자 오른쪽 ~ 아래 구분선 위, 좁은 화면은 제목 위쪽.
+  // 화면 크기가 바뀔 때만 실제 글자 위치를 재서 다시 계산합니다.
+  let Z = null;
+  function measure(){
+    const w = hero.clientWidth, h = hero.clientHeight, hr = hero.getBoundingClientRect();
+    if (innerWidth < 1024) return (Z = { cx: w * 0.26, cy: Math.min(h * 0.29, 250), size: Math.round(Math.min(130, Math.max(96, w * 0.28))), ax: 18, ay: 14 });
+    const range = document.createRange();
+    const textRight = Math.max(0, ...[...hero.querySelectorAll("h1 span")].map(sp => { range.selectNodeContents(sp); return range.getBoundingClientRect().right - hr.left; }));
+    const foot = hero.querySelector(".hs__foot"), footTop = foot ? foot.getBoundingClientRect().top - hr.top : h * 0.7;
+    const size = Math.round(Math.min(170, Math.max(110, w * 0.13), (footTop - 140) * 0.6)), ax = 36, ay = 10;
+    return (Z = { cx: Math.min(textRight + 56 + ax + size / 2, w * 0.66), cy: footTop - 32 - ay - size / 2, size, ax, ay });
+  }
+  const zone = () => Z || measure();
+  function place(t){
+    if (!lens) return;
+    const z = zone(), k = t / 1000;
+    const x = z.cx + z.ax * Math.sin(k * 2 * Math.PI / 22) - z.size / 2;
+    const y = z.cy + z.ay * Math.sin(k * 2 * Math.PI / 17 + 1) - z.size / 2;
+    lens.element.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
+    if (lens.webglInitialized && lens.render) lens.render();
+  }
+  const moving = () => motionOK.matches && !paused && shown && document.visibilityState === "visible";
+  function frame(t){ raf = 0; place(t - t0); if (moving()) raf = requestAnimationFrame(frame); }
+  function sync(){ if (moving()) { if (!raf) raf = requestAnimationFrame(frame); } else if (raf) { cancelAnimationFrame(raf); raf = 0; } }
+  function destroy(){
+    if (!lens) return;
+    const gl = lens.gl_refs && lens.gl_refs.gl; if (gl) { const ext = gl.getExtension("WEBGL_lose_context"); if (ext) ext.loseContext(); }
+    lens.gl_refs = {}; lens.element.remove();
+    Container.instances = Container.instances.filter(i => i !== lens); lens = null;
+  }
+  function create(){
+    destroy(); measure();
+    Container.pageSnapshot = null; Container.isCapturing = false; Container.waitingForSnapshot = [];   // 지금 화면으로 새로 찍기
+    const z = zone();
+    lens = new Container({ type: "circle", tintOpacity: 0.06 });
+    lens.element.style.width = lens.element.style.height = z.size + "px";
+    stage.append(lens.element); place(performance.now() - t0);
+    const me = lens;
+    (function ready(){ if (me !== lens) return; if (me.webglInitialized && me.render) { place(performance.now() - t0); me.element.classList.add("is-ready"); sync(); } else setTimeout(ready, 120); })();
+  }
+  function setShown(v){ shown = v; if (v && !lens) create(); sync(); }
+  // 첫 화면이 그려질 때만 일하기: content-visibility 이벤트, 없으면 IntersectionObserver
+  if ("oncontentvisibilityautostatechange" in stage) stage.addEventListener("contentvisibilityautostatechange", e => setShown(!e.skipped));
+  else new IntersectionObserver(es => setShown(es[0].isIntersecting), { rootMargin: "200px" }).observe(hero);
+  // 글꼴·목록이 자리를 잡은 뒤 화면을 찍도록 잠시 기다림
+  const start = () => setTimeout(() => { if (hero.offsetParent !== null || getComputedStyle(hero).display !== "none") setShown(true); }, 1500);
+  (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => document.readyState === "complete" ? start() : addEventListener("load", start, { once: true }));
+  document.addEventListener("visibilitychange", sync);
+  addEventListener("hashchange", () => { if (!lens && getComputedStyle(hero).display !== "none") setTimeout(() => setShown(true), 600); });
+  let rt = 0; addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => { if (Math.abs(innerWidth - lastW) > 40) { lastW = innerWidth; if (lens) create(); } else { measure(); place(performance.now() - t0); } }, 500); });
+  // 멈춤/재생 버튼: 움직임이 허용된 경우에만 보임
+  function label(){ toggle.hidden = !motionOK.matches; toggle.querySelector("span").textContent = paused ? "배경 움직임 재생" : "배경 움직임 멈추기";
+    toggle.querySelector("svg").innerHTML = paused ? '<path d="M4 2.5v11l9-5.5z"/>' : '<rect x="3" y="2" width="3.5" height="12" rx="1"/><rect x="9.5" y="2" width="3.5" height="12" rx="1"/>'; }
+  toggle.addEventListener("click", () => { paused = !paused; label(); sync(); });
+  motionOK.addEventListener("change", () => { label(); sync(); });
+  label();
+});
 </script>
 <script type="module" src="assets/system.js"></script>
 <script type="module" src="assets/motion/motion.js"></script>

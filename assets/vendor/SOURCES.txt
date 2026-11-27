@@ -1,0 +1,2 @@
+liquid-glass-js: https://github.com/dashersw/liquid-glass-js @ 78cb6ccb0b9987bb60a88b14ccbd13a9e6e8ab2a (MIT)
+html2canvas-pro: npm html2canvas-pro@2.6.4 dist/html2canvas-pro.min.js (MIT). README의 html2canvas@1.4.1은 oklab() 색을 읽지 못해 대신 사용
