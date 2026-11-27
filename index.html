@@ -249,7 +249,7 @@ main > section#folders { height: auto; min-height: 100svh; }
 .sheet h2 { font-size: 26px; margin: 0 0 var(--s-5); }
 .field { display: block; margin-bottom: var(--s-4); }
 .field > span { display: block; font-size: 14px; color: var(--p-muted); margin-bottom: 6px; }
-.field input:not([type=color], [type=checkbox]) { width: 100%; height: 48px; padding: 0 14px; border: 1px solid rgba(232,238,230,.16); border-radius: var(--r-sm); background: #0a1612; font: inherit; font-size: 16px; color: inherit; }
+.field input:not([type=color], [type=checkbox], [type=radio]) { width: 100%; height: 48px; padding: 0 14px; border: 1px solid rgba(232,238,230,.16); border-radius: var(--r-sm); background: #0a1612; font: inherit; font-size: 16px; color: inherit; }
 .field input:focus { outline: none; border-color: var(--p-accent); box-shadow: 0 0 0 3px rgba(200,241,105,.22); }
 .swatches { display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: center; }
 .sw { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--c); box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); cursor: pointer; transition: transform 120ms var(--ease-out); }
@@ -268,6 +268,22 @@ input[type=color] { width: 52px; height: 44px; border: 1px solid rgba(232,238,23
 .switch input:disabled { opacity: .5; cursor: not-allowed; }
 .switch:has(input:disabled) { cursor: default; }
 .err { color: var(--danger); font-size: 14px; min-height: 20px; margin: 2px 0 0; }
+/* 자료 종류(링크/PDF): 기본 라디오에 브랜드 색만 입힘 */
+.kind { border: 0; padding: 0; margin-inline: 0; display: flex; flex-wrap: wrap; gap: var(--s-2); accent-color: var(--p-accent); }
+.kind legend { padding: 0; font-size: 14px; color: var(--p-muted); margin-bottom: 6px; width: 100%; }
+.kind__opt { display: inline-flex; align-items: center; gap: var(--s-2); min-height: 48px; padding: 0 var(--s-4); border-radius: var(--r-sm); border: 1px solid rgba(232,238,230,.16); cursor: pointer; font-size: 16px; }
+.kind__opt:has(input:checked) { border-color: var(--p-accent); background: rgba(200,241,105,.08); }
+.kind__opt input { inline-size: 18px; block-size: 18px; margin: 0; flex: none; }
+.kind__opt { white-space: nowrap; }
+.kind__opt:has(input:focus-visible) { outline: 2px solid var(--p-accent); outline-offset: 2px; }
+#fileField > label { display: block; font-size: 14px; color: var(--p-muted); margin-bottom: 6px; }
+#fileField input[type=file] { width: 100%; min-height: 48px; padding: 10px 14px; border: 1px dashed rgba(232,238,230,.28); border-radius: var(--r-sm); background: #0a1612; font: inherit; font-size: 15px; color: inherit; cursor: pointer; }
+#fileField input[type=file]::file-selector-button { font: inherit; margin-right: var(--s-3); padding: 6px 12px; border: 0; border-radius: 999px; background: var(--p-accent); color: var(--p-accent-ink); cursor: pointer; }
+#fileField input[type=file]:focus-visible { outline: 2px solid var(--p-accent); outline-offset: 2px; }
+.help { display: block; font-size: 13px; line-height: 1.5; color: var(--p-muted); margin: 6px 0 0; }
+#editStatus:empty { display: none; }
+#upProg { width: 100%; margin-top: var(--s-3); accent-color: var(--p-accent); }
+.pdf-badge { display: inline-block; padding: 2px 8px; border-radius: 6px; border: 1px solid currentColor; font-size: 12px; letter-spacing: .04em; }
 .sheet .btn-row { justify-content: flex-end; margin-top: var(--s-5); flex-wrap: wrap; }
 .btn--danger { color: var(--danger) !important; margin-right: auto; }
 .btn[disabled] { opacity: .6; cursor: progress; }
@@ -407,11 +423,23 @@ input[type=color] { width: 52px; height: 44px; border: 1px solid rgba(232,238,23
   <form class="sheet" id="editForm">
     <h2 id="editTitle">편집</h2>
     <label class="field"><span>이름</span><input type="text" id="fName" maxlength="40" required></label>
+    <fieldset class="field kind" id="kindField">
+      <legend>자료 종류</legend>
+      <label class="kind__opt"><input type="radio" name="fKind" id="kindLink" value="link" checked> 링크</label>
+      <label class="kind__opt"><input type="radio" name="fKind" id="kindPdf" value="pdf"> PDF 파일</label>
+    </fieldset>
     <label class="field" id="urlField"><span>링크 주소 (https://로 시작)</span><input type="url" id="fUrl" placeholder="https://"></label>
+    <div class="field" id="fileField" hidden>
+      <label for="fFile">PDF 파일 (20MB까지)</label>
+      <input type="file" id="fFile" accept="application/pdf,.pdf" aria-describedby="fFileHelp">
+      <small class="help" id="fFileHelp">고른 PDF는 내 구글 드라이브에 저장되고, 이름을 누르면 새 창에서 열립니다.</small>
+      <progress id="upProg" hidden aria-label="PDF 올리는 중"></progress>
+    </div>
     <label class="switch" id="hiddenField"><span><b>관리자만 보기</b><small id="hiddenHelp">켜면 관리자로 로그인했을 때만 이 폴더가 보입니다.</small></span><input type="checkbox" id="fHidden" role="switch"></label>
     <div class="field"><span>색상</span><div class="swatches" id="swatches"></div></div>
     <p class="err" id="editErr" role="alert"></p>
-    <div class="btn-row"><button class="btn btn--secondary btn--danger" type="button" id="delBtn">삭제</button><button class="btn btn--secondary" type="button" data-close>취소</button><button class="btn btn--primary" type="submit">저장</button></div>
+    <p class="help" id="editStatus" role="status"></p>
+    <div class="btn-row"><button class="btn btn--secondary btn--danger" type="button" id="delBtn">삭제</button><button class="btn btn--secondary" type="button" data-close>취소</button><button class="btn btn--primary" type="submit" id="saveBtn">저장</button></div>
   </form>
 </div>
 <div class="toast" id="toast" role="status"></div>
@@ -464,7 +492,18 @@ function shown(hex){
 }
 function textOn(hex){ const L = lum(hex); return (L + 0.05) / (lum("#0B2219") + 0.05) > 1.05 / (L + 0.05) ? "#0B2219" : "#FFFFFF"; }
 function toast(msg){ const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 2600); }
-function cleanLink(i){ return { id: i.id, name: String(i.name || "이름 없음"), url: String(i.url || ""), color: safeColor(i.color) }; }
+function cleanLink(i){
+  const o = { id: i.id, name: String(i.name || "이름 없음"), url: String(i.url || ""), color: safeColor(i.color) };
+  if (i.type === "pdf" && /^[\w-]{10,}$/.test(i.file || "")) { o.type = "pdf"; o.file = i.file; o.fileName = String(i.fileName || "").slice(0, 120); }
+  return o;
+}
+const MAX_PDF = 20 * 1024 * 1024;
+// 파일을 base64 글자로(앞의 data:...;base64, 부분은 뗌)
+function fileToB64(file){
+  return new Promise((ok, fail) => { const r = new FileReader(); r.onload = () => ok(String(r.result).split(",")[1] || ""); r.onerror = () => fail(r.error); r.readAsDataURL(file); });
+}
+// 이 사이트가 올린 PDF를 드라이브 휴지통으로(실패해도 목록 저장에는 영향 없음)
+function trashFile(id){ if (id) post("trash", password, null, { fileId: id }).catch(() => {}); }
 function normalize(d){
   const out = { title: typeof d?.title === "string" && d.title ? d.title : FALLBACK.title, favorites: [], folders: [] };
   out.favorites = (Array.isArray(d?.favorites) ? d.favorites : []).filter(i => safeId(i.id)).map(cleanLink);
@@ -534,7 +573,8 @@ function card(f){
 function row(o, folderId){
   const style = `--c:${shown(o.color)};--fg:${textOn(shown(o.color))}`;
   const url = safeUrl(o.url);
-  const inner = `<span class="dot" aria-hidden="true"></span><span class="nm">${esc(o.name)}</span><span class="sub host">${url ? esc(host(url)) : "링크 없음"}</span><span class="go">${ARROW}</span>`;
+  const tag = o.type === "pdf" ? `<span class="pdf-badge">PDF</span>` : (url ? esc(host(url)) : "링크 없음");
+  const inner = `<span class="dot" aria-hidden="true"></span><span class="nm">${esc(o.name)}</span><span class="sub host">${tag}</span><span class="go">${ARROW}</span>`;
   return `<li class="row${url ? "" : " nolink"}" style="${style}">${url ? `<a class="hit" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${inner}</a>` : `<div class="hit">${inner}</div>`}${tools("item", folderId, o.id)}</li>`;
 }
 function fav(o){
@@ -637,7 +677,7 @@ function persist(){
   });
 }
 function openModal(id){ $(id).classList.add("open"); const i = $(id).querySelector("input"); if (i) setTimeout(() => i.focus(), 30); }
-function closeModals(){ document.querySelectorAll(".modal").forEach(m => m.classList.remove("open")); }
+function closeModals(){ if (uploading) return; document.querySelectorAll(".modal").forEach(m => m.classList.remove("open")); }
 function drawSwatches(){
   $("swatches").innerHTML = PALETTE.map(c => `<button type="button" class="sw${c.toLowerCase() === pickedColor.toLowerCase() ? " sel" : ""}" style="--c:${c}" data-color="${c}" aria-label="색상 ${c}"></button>`).join("")
     + `<input type="color" id="customColor" value="${safeColor(pickedColor)}" aria-label="색 직접 고르기">`;
@@ -650,8 +690,14 @@ function openEditor(kind, folderId, id){
   const names = { folder: "폴더", item: "자료 버튼", fav: "즐겨찾기" };
   $("editTitle").textContent = (id ? names[kind] + " 편집" : "새 " + names[kind]);
   $("fName").value = obj ? obj.name : "";
-  $("fUrl").value = obj && kind !== "folder" ? obj.url : "";
-  $("urlField").style.display = kind === "folder" ? "none" : "";
+  const isPdf = !!(obj && obj.type === "pdf");
+  $("fUrl").value = obj && kind !== "folder" && !isPdf ? obj.url : "";
+  $("kindField").hidden = kind !== "item";
+  $(isPdf ? "kindPdf" : "kindLink").checked = true;
+  $("fFile").value = "";
+  $("fFileHelp").textContent = isPdf ? `지금 파일: ${obj.fileName || "PDF"}. 새 파일을 고르면 바뀝니다.` : "고른 PDF는 내 구글 드라이브에 저장되고, 이름을 누르면 새 창에서 열립니다.";
+  $("editStatus").textContent = ""; $("upProg").hidden = true;
+  showKind();
   $("hiddenField").style.display = kind === "folder" ? "" : "none";
   $("fHidden").checked = !!(obj && obj.adminOnly);
   $("fHidden").disabled = !canHide;
@@ -662,6 +708,14 @@ function openEditor(kind, folderId, id){
   $("editErr").textContent = "";
   drawSwatches(); openModal("editModal");
 }
+// 링크/PDF 선택에 따라 칸을 바꿔 보여 줌
+function showKind(){
+  const item = editing && editing.kind !== "folder";
+  const pdf = item && editing.kind === "item" && $("kindPdf").checked;
+  $("urlField").style.display = item && !pdf ? "" : "none";
+  $("fileField").hidden = !pdf;
+}
+document.addEventListener("change", e => { if (e.target.name === "fKind") showKind(); });
 function move(kind, folderId, id, dir){
   const list = listOf(kind, folderId); if (!list) return;
   const i = list.findIndex(x => x.id === id), j = i + dir;
@@ -717,11 +771,46 @@ $("loginForm").addEventListener("submit", async e => {
   else if (res === "nopassword") $("loginErr").textContent = "구글 시트 메뉴 [수업자료일람 > 관리자 비밀번호 설정]에서 비밀번호를 먼저 정하세요.";
   else $("loginErr").textContent = "서버에 연결하지 못했습니다. 인터넷 연결을 확인하세요.";
 });
-$("editForm").addEventListener("submit", e => {
+let uploading = false;
+const UPLOAD_ERR = {
+  toolarge: "PDF는 20MB까지 올릴 수 있습니다.",
+  notpdf: "PDF 파일이 아닙니다. 확장자가 .pdf인 파일을 골라 주세요.",
+  invalid: "PDF 올리기는 구글 시트의 Apps Script를 새 코드로 바꾸고 다시 배포한 뒤에 쓸 수 있습니다.",
+  locked: "비밀번호를 여러 번 틀려 10분 동안 잠겼습니다.",
+  wrong: "비밀번호가 바뀌었습니다. 다시 로그인하세요.",
+  nopassword: "비밀번호가 바뀌었습니다. 다시 로그인하세요."
+};
+$("editForm").addEventListener("submit", async e => {
   e.preventDefault();
-  const name = $("fName").value.trim(), url = $("fUrl").value.trim();
-  if (!name) { $("editErr").textContent = "이름을 입력하세요."; return; }
-  if (editing.kind !== "folder" && url && !safeUrl(url)) { $("editErr").textContent = "링크는 https:// 로 시작해야 합니다."; return; }
+  if (uploading) return;
+  const name = $("fName").value.trim();
+  let url = $("fUrl").value.trim();
+  if (!name) { $("editErr").textContent = "이름을 입력하세요."; $("fName").focus(); return; }
+  const wantPdf = editing.kind === "item" && $("kindPdf").checked;
+  if (editing.kind !== "folder" && !wantPdf && url && !safeUrl(url)) { $("editErr").textContent = "링크는 https:// 로 시작해야 합니다."; $("fUrl").focus(); return; }
+  const prev = editing.id && editing.kind === "item" ? (listOf("item", editing.folderId) || []).find(i => i.id === editing.id) : null;
+  let pdf = null;   // 새로 올린 PDF
+  if (wantPdf) {
+    const file = $("fFile").files[0];
+    if (!file && !(prev && prev.type === "pdf")) { $("editErr").textContent = "올릴 PDF 파일을 고르세요."; $("fFile").focus(); return; }
+    if (file) {
+      if (!/\.pdf$/i.test(file.name) && file.type !== "application/pdf") { $("editErr").textContent = UPLOAD_ERR.notpdf; $("fFile").focus(); return; }
+      if (file.size > MAX_PDF) { $("editErr").textContent = UPLOAD_ERR.toolarge; $("fFile").focus(); return; }
+      uploading = true; $("editErr").textContent = "";
+      $("saveBtn").disabled = true; $("upProg").hidden = false;
+      $("editStatus").textContent = `PDF를 올리는 중입니다(${(file.size / 1048576).toFixed(1)}MB). 잠시만 기다려 주세요.`;
+      let res;
+      try { res = await post("upload", password, null, { file: { name: file.name, b64: await fileToB64(file) } }); }
+      catch (er) { res = { result: "error" }; }
+      uploading = false; $("saveBtn").disabled = false; $("upProg").hidden = true; $("editStatus").textContent = "";
+      if (res.result !== "ok") {
+        $("editErr").textContent = UPLOAD_ERR[res.result] || "PDF를 올리지 못했습니다. 인터넷 연결을 확인하고 다시 해 주세요.";
+        if (res.result === "wrong" || res.result === "nopassword" || res.result === "locked") { setPassword(""); closeModals(); toast($("editErr").textContent); load(); }
+        return;
+      }
+      pdf = { url: res.url, file: res.id, fileName: res.name };
+    }
+  }
   const color = safeColor(pickedColor);
   const list = listOf(editing.kind, editing.folderId); if (!list) return;
   if (editing.kind === "folder") {
@@ -731,8 +820,16 @@ $("editForm").addEventListener("submit", e => {
     else { f = { id: newId(), name, color, items: [] }; list.push(f); }
     if (canHide) { if (hidden) f.adminOnly = true; else delete f.adminOnly; }
   } else {
-    if (editing.id) Object.assign(list.find(i => i.id === editing.id), { name, url, color });
-    else list.push({ id: newId(), name, url, color });
+    let item = editing.id ? list.find(i => i.id === editing.id) : null;
+    if (!item) { item = { id: newId() }; list.push(item); }
+    const oldFile = item.type === "pdf" ? item.file : "";
+    Object.assign(item, { name, color });
+    if (wantPdf) {
+      if (pdf) { Object.assign(item, { type: "pdf", url: pdf.url, file: pdf.file, fileName: pdf.fileName }); if (oldFile && oldFile !== pdf.file) trashFile(oldFile); }
+    } else {
+      item.url = url; delete item.type; delete item.file; delete item.fileName;
+      if (oldFile) trashFile(oldFile);
+    }
   }
   closeModals(); persist();
 });
@@ -741,7 +838,10 @@ $("delBtn").addEventListener("click", () => {
   const k = editing.kind;
   if (k === "folder") data.folders = data.folders.filter(f => f.id !== editing.id);
   else if (k === "fav") data.favorites = data.favorites.filter(f => f.id !== editing.id);
-  else { const f = data.folders.find(x => x.id === editing.folderId); if (f) f.items = f.items.filter(i => i.id !== editing.id); }
+  else {
+    const f = data.folders.find(x => x.id === editing.folderId);
+    if (f) { const gone = f.items.find(i => i.id === editing.id); if (gone && gone.type === "pdf") trashFile(gone.file); f.items = f.items.filter(i => i.id !== editing.id); }
+  }
   closeModals();
   if (k === "folder" && location.hash === "#f-" + editing.id) location.hash = "folders";
   persist();
