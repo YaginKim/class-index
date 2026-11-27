@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>김아근의 수업자료일람: 수업 자료와 학급 운영 링크 모음</title>
+<title>야근 헤드쿼터: 수업 자료와 학급 운영 링크 모음</title>
 <meta name="description" content="김아근 선생님이 수업과 학급 운영에 쓰는 자료 링크를 주제별 폴더와 즐겨찾기로 정리한 선생님용 자료실입니다.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="김아근의 수업자료일람">
+<meta property="og:title" content="야근 헤드쿼터">
 <meta property="og:description" content="수업 자료와 학급 운영 링크를 주제별 폴더와 즐겨찾기로 정리한 선생님용 자료실">
 <meta property="og:image" content="share.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -132,12 +132,12 @@ h1, h2, .nm, .close__word, .fcard__name { word-break: keep-all; }
 
 /* 떠 있는 유리 폴더(장식): 바깥(.g)은 포인터를 따라 깊이만큼 움직이고, 안쪽(.g__in)은 천천히 떠다닙니다 */
 .shapes { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
-/* 첫 화면 배경의 유리 렌즈 하나(liquid-glass-js). 도형(z 0) 위, 글자(z 1) 아래. 화면에서 안 보이면 그리기를 멈춤 */
-.lg-stage { position: absolute; inset: 0; z-index: 0; pointer-events: none; content-visibility: auto; }
+/* 첫 화면의 유리 렌즈 하나(liquid-glass-js). 글자(z 1) 위를 지나가며 제목을 굴절시킴. 클릭은 통과(pointer-events: none). 화면에서 안 보이면 그리기를 멈춤 */
+.lg-stage { position: absolute; inset: 0; z-index: 2; pointer-events: none; content-visibility: auto; }
 .lg-stage .glass-container { position: absolute; left: 0; top: 0; padding: 0; opacity: 0; transition: opacity 900ms ease; will-change: transform; }
 .lg-stage .glass-container.is-ready { opacity: .9; }
 .lg-stage .glass-container canvas { box-shadow: 0 30px 60px rgba(0,0,0,.35) !important; }
-.lg-toggle { position: absolute; z-index: 2; right: var(--gut); bottom: 12px; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid rgba(232,238,230,.18); background: rgba(10,22,18,.6); color: var(--p-ink, #eef1ea); font: inherit; font-size: 13px; cursor: pointer; transition: background-color 150ms ease, border-color 150ms ease; }
+.lg-toggle { position: absolute; z-index: 3; right: var(--gut); bottom: 12px; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 999px; border: 1px solid rgba(232,238,230,.18); background: rgba(10,22,18,.6); color: var(--p-ink, #eef1ea); font: inherit; font-size: 13px; cursor: pointer; transition: background-color 150ms ease, border-color 150ms ease; }
 .lg-toggle:hover { border-color: rgba(232,238,230,.4); background: rgba(10,22,18,.85); }
 .lg-toggle:focus-visible { outline: 2px solid var(--p-accent, #c8f169); outline-offset: 2px; }
 .lg-toggle svg { width: 14px; height: 14px; }
@@ -246,6 +246,7 @@ main > section#folders { height: auto; min-height: 100svh; }
 
 /* ── 마무리 ── */
 .close__word { font-family: var(--font-display); }
+.close__word .is-accent { color: var(--accent); }
 .close__en { display: block; font-size: clamp(22px, 2vw + 10px, 40px); color: var(--muted); margin-top: var(--s-3); }
 .footer__legal .en { font-size: 15px; }
 .legal-row { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--s-2) var(--s-6); }
@@ -346,7 +347,7 @@ input[type=color] { width: 52px; height: 44px; border: 1px solid rgba(232,238,23
 <header class="nav">
   <div class="wrap nav__bar">
     <a class="skip-link" href="#top">본문으로 건너뛰기</a>
-    <a class="nav__logo" href="#top"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#C8F169"/><circle cx="12.6" cy="16" r="6.2" fill="none" stroke="#06402B" stroke-width="2.6"/><circle cx="19.4" cy="16" r="6.2" fill="none" stroke="#06402B" stroke-width="2.6" opacity=".72"/></svg>수업자료일람</a>
+    <a class="nav__logo" href="#top"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#C8F169"/><circle cx="12.6" cy="16" r="6.2" fill="none" stroke="#06402B" stroke-width="2.6"/><circle cx="19.4" cy="16" r="6.2" fill="none" stroke="#06402B" stroke-width="2.6" opacity=".72"/></svg>야근 헤드쿼터</a>
     <nav class="nav__links" aria-label="주 메뉴">
       <div class="nav__item"><a class="nav__link" href="#folders">폴더</a></div>
       <div class="nav__item"><a class="nav__link" href="#favs">즐겨찾기</a></div>
@@ -369,7 +370,7 @@ input[type=color] { width: 52px; height: 44px; border: 1px solid rgba(232,238,23
     <div class="wrap">
       <div class="hero-text hs">
         <p class="hs__kicker en" lang="en">Class materials, indexed</p>
-        <h1 id="hero-h" class="hs__title"><span>김아근의</span><span>수업자료</span><span class="is-accent">일람</span></h1>
+        <h1 id="hero-h" class="hs__title"><span class="is-accent">야근</span><span>헤드쿼터</span></h1>
         <div class="hs__foot">
           <p class="hs__lead">수업과 학급 운영에 쓰는 자료 링크를 주제별 폴더로 정리해 둔 선생님용 자료실입니다.</p>
           <dl class="hero-facts">
@@ -395,7 +396,7 @@ input[type=color] { width: 52px; height: 44px; border: 1px solid rgba(232,238,23
 
   <section class="section ground-inverse" id="favs" aria-labelledby="favs-h">
     <div class="wrap">
-      <div class="rail__top"><a class="nav__logo" href="#top"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#C8F169"/><circle cx="12.6" cy="16" r="6.2" fill="none" stroke="#06402B" stroke-width="2.6"/><circle cx="19.4" cy="16" r="6.2" fill="none" stroke="#06402B" stroke-width="2.6" opacity=".72"/></svg>수업자료일람</a></div>
+      <div class="rail__top"><a class="nav__logo" href="#top"><svg class="logo-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#C8F169"/><circle cx="12.6" cy="16" r="6.2" fill="none" stroke="#06402B" stroke-width="2.6"/><circle cx="19.4" cy="16" r="6.2" fill="none" stroke="#06402B" stroke-width="2.6" opacity=".72"/></svg>야근 헤드쿼터</a></div>
       <div class="fav-head"><h2 id="favs-h">즐겨찾기</h2><span class="en" lang="en">Favourites</span></div>
       <ul class="favs" id="favList"></ul>
       <div id="favAdd"></div>
@@ -414,7 +415,7 @@ input[type=color] { width: 52px; height: 44px; border: 1px solid rgba(232,238,23
         <div><h2 id="close-h">찾는 자료는 폴더에 있습니다</h2><p class="t-lead">주제별 폴더를 열면 자료 이름이 줄지어 있고, 누르면 새 창에서 열립니다.</p></div>
         <a class="btn btn--primary" href="#folders">폴더 열어 보기<svg class="m-arrow" viewBox="0 0 12 12" aria-hidden="true"><path class="m-arrow__stem" d="M1 6h8"/><path class="m-arrow__head" d="M4.5 2.5 8 6l-3.5 3.5"/></svg></a>
       </div>
-      <p class="close__word" aria-hidden="true">수업자료일람<span class="close__en en">Kim's class index</span></p>
+      <p class="close__word" aria-hidden="true"><span class="is-accent">야근</span> 헤드쿼터<span class="close__en en">Kim's class index</span></p>
     </div>
     <div class="closing__links">
       <div class="footer__legal">
@@ -469,7 +470,8 @@ const CONNECTED = /^(https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec|http
 const SHEET = /^https:\/\/docs\.google\.com\/spreadsheets\//.test(CFG.sheetUrl || "") ? CFG.sheetUrl : "";
 
 const PALETTE = ["#06402B","#E85D75","#F2A541","#3BA58B","#3D7DD8","#C8F169","#F06A3A","#2F3640"];
-const FALLBACK = {"title":"김아근의 수업자료일람","favorites":[],"folders":[{"id":"art","name":"미술 관련","color":"#E85D75","items":[{"id":"pencil","name":"연필 소묘 입문","url":"https://claude.ai/artifact/RQU23eYAsQpbQNbF8MuUAe","color":"#2F3640"}]},{"id":"class","name":"학급 관리","color":"#3D7DD8","items":[]},{"id":"game","name":"게이미피케이션","color":"#8E5BD9","items":[]}]};
+const SITE_TITLE = "야근 헤드쿼터";   // 사이트 이름(탭 제목 등). 시트에 저장된 옛 제목보다 우선합니다
+const FALLBACK = {"title":"야근 헤드쿼터","favorites":[],"folders":[{"id":"art","name":"미술 관련","color":"#E85D75","items":[{"id":"pencil","name":"연필 소묘 입문","url":"https://claude.ai/artifact/RQU23eYAsQpbQNbF8MuUAe","color":"#2F3640"}]},{"id":"class","name":"학급 관리","color":"#3D7DD8","items":[]},{"id":"game","name":"게이미피케이션","color":"#8E5BD9","items":[]}]};
 const ARROW = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
 const OUT = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 11 11 5M6 5h5v5"/></svg>';
 const BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>';
@@ -643,14 +645,14 @@ function render(){
   const f = currentFolder();
   document.body.classList.toggle("view-folder", !!f);
   if (f) {
-    document.title = `${f.name} · ${data.title}`;
+    document.title = `${f.name} · ${SITE_TITLE}`;
     $("folderView").innerHTML = `<a class="btn btn--secondary back" href="#folders">${BACK}전체 폴더</a>
       <div class="fold-head"><h2 id="folder-h"><i class="tag" style="--c:${shown(f.color)}" aria-hidden="true"></i>${esc(f.name)}${lockChip(f)}</h2><span class="sub">자료 <span class="num">${f.items.length}</span>개 · 이름을 누르면 새 창에서 열립니다</span></div>
       <ul class="list">${f.items.map(x => row(x, f.id)).join("")}</ul>
       ${addBtn("addItem", "자료 버튼 추가", f.id)}
       ${!f.items.length && !admin ? `<p class="empty">이 폴더에는 아직 자료가 없습니다.</p>` : ""}${note()}`;
   } else {
-    document.title = `${data.title}: 수업 자료와 학급 운영 링크 모음`;
+    document.title = `${SITE_TITLE}: 수업 자료와 학급 운영 링크 모음`;
     $("folderView").innerHTML = `<h2 id="folder-h">폴더</h2>`;
   }
 }
@@ -876,7 +878,7 @@ load();
 <script src="assets/vendor/liquid-glass/container.js" defer></script>
 <script src="assets/vendor/liquid-glass/button.js" defer></script>
 <script>
-// 유리 렌즈 하나를 첫 화면의 빈 자리에서 천천히 떠다니게 합니다.
+// 유리 렌즈 하나를 첫 화면 제목 위로 넓게, 천천히 떠다니게 합니다(글자가 렌즈 안에서 휘어 보임).
 //  - 움직임 줄이기 설정이면 처음부터 멈춘 채로 보여 줍니다(움직임은 no-preference일 때만).
 //  - 계속 움직이는 효과라 멈춤/재생 버튼을 둡니다.
 //  - 첫 화면이 안 보이거나 탭이 숨겨지면 그리기를 멈춥니다.
@@ -887,24 +889,28 @@ addEventListener("DOMContentLoaded", () => {
   try { const c = document.createElement("canvas"); if (!c.getContext("webgl")) return; } catch (e) { return; }
   const motionOK = matchMedia("(prefers-reduced-motion: no-preference)");
   let lens = null, raf = 0, shown = false, paused = false, t0 = performance.now(), lastW = innerWidth;
-  // 렌즈가 머무는 빈 자리: 넓은 화면은 제목 글자 오른쪽 ~ 아래 구분선 위, 좁은 화면은 제목 위쪽.
-  // 화면 크기가 바뀔 때만 실제 글자 위치를 재서 다시 계산합니다.
+  // 렌즈가 돌아다니는 범위: 제목 글자 왼쪽 끝 ~ 화면 오른쪽 62%, 키커 아래 ~ 아래 구분선 위.
+  // 렌즈가 제목 위를 지나가며 글자를 굴절시킵니다. 화면 크기가 바뀔 때만 다시 잽니다.
   let Z = null;
   function measure(){
     const w = hero.clientWidth, h = hero.clientHeight, hr = hero.getBoundingClientRect();
-    if (innerWidth < 1024) return (Z = { cx: w * 0.26, cy: Math.min(h * 0.29, 250), size: Math.round(Math.min(130, Math.max(96, w * 0.28))), ax: 18, ay: 14 });
-    const range = document.createRange();
-    const textRight = Math.max(0, ...[...hero.querySelectorAll("h1 span")].map(sp => { range.selectNodeContents(sp); return range.getBoundingClientRect().right - hr.left; }));
-    const foot = hero.querySelector(".hs__foot"), footTop = foot ? foot.getBoundingClientRect().top - hr.top : h * 0.7;
-    const size = Math.round(Math.min(170, Math.max(110, w * 0.13), (footTop - 140) * 0.6)), ax = 36, ay = 10;
-    return (Z = { cx: Math.min(textRight + 56 + ax + size / 2, w * 0.66), cy: footTop - 32 - ay - size / 2, size, ax, ay });
+    const title = hero.querySelector("h1"), tr = title ? title.getBoundingClientRect() : null;
+    const foot = hero.querySelector(".hs__foot"), footTop = foot ? foot.getBoundingClientRect().top - hr.top : h * 0.72;
+    const wide = innerWidth >= 1024;
+    const size = Math.round(wide ? Math.min(240, Math.max(160, w * 0.18)) : Math.min(170, Math.max(120, w * 0.36)));
+    const left = (tr ? tr.left - hr.left : w * 0.08) + size * 0.15;
+    const right = wide ? w * 0.64 : w - 12;
+    const top = Math.max((tr ? tr.top - hr.top : h * 0.3) - size * 0.35, (wide ? 72 : 64));
+    const bottom = footTop - 16;
+    const x0 = left + size / 2, x1 = Math.max(x0, right - size / 2), y0 = top + size / 2, y1 = Math.max(y0, bottom - size / 2);
+    return (Z = { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, size, ax: (x1 - x0) / 2, ay: (y1 - y0) / 2 });
   }
   const zone = () => Z || measure();
   function place(t){
     if (!lens) return;
     const z = zone(), k = t / 1000;
-    const x = z.cx + z.ax * Math.sin(k * 2 * Math.PI / 22) - z.size / 2;
-    const y = z.cy + z.ay * Math.sin(k * 2 * Math.PI / 17 + 1) - z.size / 2;
+    const x = z.cx + z.ax * Math.sin(k * 2 * Math.PI / 26) - z.size / 2;
+    const y = z.cy + z.ay * Math.sin(k * 2 * Math.PI / 19 + 1) - z.size / 2;
     lens.element.style.transform = `translate3d(${x.toFixed(1)}px, ${y.toFixed(1)}px, 0)`;
     if (lens.webglInitialized && lens.render) lens.render();
   }
@@ -920,8 +926,10 @@ addEventListener("DOMContentLoaded", () => {
   function create(){
     destroy(); measure();
     Container.pageSnapshot = null; Container.isCapturing = false; Container.waitingForSnapshot = [];   // 지금 화면으로 새로 찍기
+    // README의 전역 유리 설정: 흐림을 줄이고 굴절을 키워, 렌즈 안에서 제목 글자가 또렷하게 휘어 보이게
+    window.glassControls = { blurRadius: 1.2, edgeIntensity: 0.06, rimIntensity: 0.12, baseIntensity: 0.035, edgeDistance: 0.22, rimDistance: 0.9, baseDistance: 0.2, cornerBoost: 0.03, rippleEffect: 0.12, tintOpacity: 0.05 };
     const z = zone();
-    lens = new Container({ type: "circle", tintOpacity: 0.06 });
+    lens = new Container({ type: "circle", tintOpacity: 0.05 });
     lens.element.style.width = lens.element.style.height = z.size + "px";
     stage.append(lens.element); place(performance.now() - t0);
     const me = lens;
